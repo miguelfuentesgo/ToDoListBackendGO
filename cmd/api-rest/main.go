@@ -1,16 +1,14 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 
-	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
-	"gitlab.com/miguelit0/toDoApp/handlers"
-	"gitlab.com/miguelit0/toDoApp/server"
+	"github.com/valyala/fasthttp"
+
+	"gitlab.com/miguelit0/toDoApp/router"
 )
 
 func main() {
@@ -24,24 +22,14 @@ func main() {
 
 	PORT := os.Getenv("PORT")
 
-	JWTSECRET := os.Getenv("JWT_SECRET")
+	router := router.NewRouter()
 
-	DATABASEURL := os.Getenv("DATABASE_URL")
+	handler := router.Handler
 
-	s, err := server.NewServer(context.Background(), &server.Config{
-		JWTSecret:   JWTSECRET,
-		Port:        PORT,
-		DataBaseUrl: DATABASEURL,
-	})
+	log.Printf("Listening on port %v", PORT)
 
-	if err != nil {
-		log.Fatal(err)
+	if err := fasthttp.ListenAndServe("localhost:"+PORT, handler); err != nil {
+		log.Fatal(err.Error())
 	}
 
-	s.Start(BindRoutes)
-
-}
-
-func BindRoutes(s server.Server, r *mux.Router) {
-	r.HandleFunc("/", handlers.HomeHandler()).Methods(http.MethodGet)
 }
