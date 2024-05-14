@@ -18,6 +18,8 @@ type Route struct {
 	HandlerFunc fasthttp.RequestHandler
 }
 
+// Builder router
+
 func NewRouter() *fasthttprouter.Router {
 	handlers := &RouteHandlers{
 		router: fasthttprouter.New(),
