@@ -1,30 +1,40 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
 	"github.com/joho/godotenv"
 	"github.com/valyala/fasthttp"
-
+	database "gitlab.com/miguelit0/toDoApp/database"
+	repository "gitlab.com/miguelit0/toDoApp/repository"
 	"gitlab.com/miguelit0/toDoApp/router"
 )
 
 func main() {
-	fmt.Println("Hello mom, im doing backend")
-
-	err := godotenv.Load(".env")
+	// Load environment variables
+	err := godotenv.Load("../../.env")
 
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-
+	// Saving in variables from .env
 	PORT := os.Getenv("PORT")
+	URL := os.Getenv("DATABASE_URL")
 
-	router := router.NewRouter()
+	//struct database with methods that execute queries and DML
+	repo, err := database.NewPostgresRepository(URL)
 
-	handler := router.Handler
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Assign postgres repository as repository. It complies the interface repository
+	repository.NewRepository(repo)
+
+	routerTasks := router.NewRouter()
+
+	handler := routerTasks.Handler
 
 	log.Printf("Listening on port %v", PORT)
 
